@@ -50,9 +50,9 @@ pub mod rsa_key {
         y
     }
 
-    pub fn generate_prime() -> BigInt {
+    pub fn generate_prime(num_bits: &u64) -> BigInt {
         // generate random number z
-        let z = gen_random(123);
+        let z = gen_random(num_bits);
         let primes: Vec<BigInt> = vec![BigInt::from(1), BigInt::from(7), BigInt::from(11), BigInt::from(13),
                                        BigInt::from(17), BigInt::from(19), BigInt::from(23), BigInt::from(29)];
         
@@ -91,13 +91,16 @@ pub mod rsa_key {
         let n = p*q;
         let phi_n: BigInt = (p - BigInt::from(1)) * (q - BigInt::from(1));
         // erzeuge e zufällig, check if euklid(e, phi_n) == 1 
-        let e: BigInt = (BigInt::one() << 16) + BigInt::one();
+        let mut e: BigInt = (BigInt::one() << 16) + BigInt::one();
         if euclid(&e, &phi_n) != One::one() {
             // erzeuge 16 bit primzahl e
-            println!("e phi nicht teilerfremd")
+            e = generate_prime(&11_u64);
         }
         // euklidex d berechnen 
-        let d = euclidex(&phi_n, &e).2;
+        let mut d = euclidex(&phi_n, &e).2;
+        if d < Zero::zero() {
+            d = phi_n + d;
+        }
         ((e,n.clone()), (d,n.clone()))
     }
 
@@ -136,16 +139,18 @@ pub mod rsa_key {
             t = &t_0 - &d * &t_1;
             s_0 = s_1.clone(); s_1 = s.clone(); t_0 = t_1.clone(); t_1 = t.clone();
         }    
-        let ggt = &s*a + &t*b;
-        (ggt, s, t)
+        let gcd = &s*a + &t*b;
+        assert_eq!(gcd, euclid(a, b));
+        (gcd, s, t)
     }
 
-    fn gen_random (num_bits: u64) -> BigInt {
+    fn gen_random (num_bits: &u64) -> BigInt {
         let mut rng = rand::thread_rng();
-        let mut z = rng.gen_bigint(num_bits);
+        let mut z = rng.gen_bigint(*num_bits);
         while z.sign() == Sign::Minus {
-            z = rng.gen_bigint(num_bits);
+            z = rng.gen_bigint(*num_bits);
         }
+        z.set_bit(num_bits-1, true);
         z
     }
 }

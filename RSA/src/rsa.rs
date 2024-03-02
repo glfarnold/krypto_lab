@@ -20,11 +20,11 @@ pub mod rsa {
         y
     }
 
-    pub fn rsa_encrypt(x: &BigInt, public_key: (&BigInt, &BigInt)) -> BigInt {
-        square_and_multiply(x, public_key.1, public_key.0)
+    pub fn rsa_encrypt(x: &BigInt, public_key: &(BigInt, BigInt)) -> BigInt {
+        square_and_multiply(x, &public_key.0, &public_key.1)
     }
 
-    pub fn rsa_decrypt(y: &BigInt, private_key: (&BigInt, &BigInt)) -> BigInt {
-        square_and_multiply(y, private_key.1, private_key.0)
+    pub fn rsa_decrypt(y: &BigInt, private_key: &(BigInt, BigInt)) -> BigInt {
+        square_and_multiply(y, &private_key.0, &private_key.1)
     }
 }

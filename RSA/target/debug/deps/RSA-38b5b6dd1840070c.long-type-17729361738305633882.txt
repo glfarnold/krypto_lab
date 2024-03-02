@@ -1,0 +1,1 @@
+&Vec<for<'a, 'b> fn(&'a num_bigint::BigInt, &'b num_bigint::BigInt) -> ((num_bigint::BigInt, num_bigint::BigInt), (num_bigint::BigInt, num_bigint::BigInt)) {rsa_key::rsa_key::rsa_keygen}>
