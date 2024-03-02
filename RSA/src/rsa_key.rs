@@ -5,8 +5,8 @@ pub mod rsa_key {
 
     pub fn miller_rabin(n: &BigInt) -> bool {
         //determine k
-        let val: BigInt = n.clone() - BigInt::from(1);
-        let k = val.trailing_zeros().unwrap();
+        let n_minus_1: BigInt = n.clone() - BigInt::from(1);
+        let k = n_minus_1.trailing_zeros().unwrap();
 
         // determine m
         let tmp = BigInt::from(1) << k;
@@ -24,7 +24,7 @@ pub mod rsa_key {
             return true;
         }
         for i in 1..k+1 {
-            if -b.clone() == One::one() {
+            if b.clone() == n_minus_1 {
                 return true
             }
             b = (&b * &b) % n;
@@ -52,12 +52,11 @@ pub mod rsa_key {
 
     pub fn generate_prime() -> BigInt {
         // generate random number z
-        // let z = gen_random(123);
-        let z = BigInt::from(1);
+        let z = gen_random(123);
         let primes: Vec<BigInt> = vec![BigInt::from(1), BigInt::from(7), BigInt::from(11), BigInt::from(13),
                                        BigInt::from(17), BigInt::from(19), BigInt::from(23), BigInt::from(29)];
         
-        let mut p = BigInt::from(30*&z);
+        let mut p = BigInt::from(30) * &z;
         let mut i = 1;
 
         loop {
