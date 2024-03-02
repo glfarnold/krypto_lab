@@ -3,6 +3,8 @@ pub mod functions {
     use std::fs::File;
     use std::io::{self, BufRead};
     use std::path::Path;
+    use crate::io_files::io_files::*;
+
 
     pub fn add_round_key(matrix: &mut Array2<u8>, keys: &Vec<Vec<u8>>, round: usize) -> Array2<u8> {
         let mut encrypted_matrix: Array2<u8> = matrix.clone();
@@ -135,18 +137,23 @@ pub mod functions {
         let rounds = keys.len();
         let mut matrix: Array2<u8> = ini_aes(block);
         matrix = add_round_key(&mut matrix, keys, 0);
-    
+        println!("{:?}", matrix);
         for round in 1..rounds-1 {
             matrix = sub_bytes(&matrix, &get_sub_matrix(true));
+            println!("{:?}", matrix);
             matrix = shift_rows(&mut matrix);
+            println!("{:?}", matrix);
             matrix = mix_columns(&mut matrix);
+            println!("{:?}", matrix);
             matrix = add_round_key(&mut matrix, keys, round);
-            println!("{round}");
             println!("{:?}", matrix);
         }
         matrix = sub_bytes(&matrix, &get_sub_matrix(true));
+        println!("{:?}", matrix);
         matrix = shift_rows(&mut matrix);
+        println!("{:?}", matrix);
         matrix = add_round_key(&mut matrix, keys, rounds-1);
+        println!("{:?}", matrix);
     
         // transform matrix back into vector as it is the return type
         for col in matrix.columns() {
@@ -154,23 +161,5 @@ pub mod functions {
             crypttext.extend(tmp);
         }
         crypttext
-    }
-
-    pub fn hex_input(path: &str) -> Vec<Vec<u8>> {
-        let file = File::open(path).expect("path does not exist");
-        let contents = io::BufReader::new(file);
-    
-        let mut vec: Vec<Vec<u8>> = Vec::new();
-        for line in contents.lines() {
-            match line {
-                Ok(line_contents) => {
-                    let vals: Vec<&str> = line_contents.split_whitespace().collect();
-                    vec.push(vals.iter().map(|&val| u8::from_str_radix(val, 16).unwrap()).collect());
-                },
-                Err(_) => eprintln!("could not read contents of file")
-            };
-        }
-        vec
-    } 
-    
+    }    
 }
