@@ -31,10 +31,10 @@ pub mod add {
         crypttext
     }
 
-    pub fn decrypt(crypttext: &String) -> String {
+    pub fn decrypt(crypttext: &String) -> (String, i32) {
         let max_index: u8 = find_max(crypttext) as u8;
         let key: i32 = (max_index as i32 - 4) % 26;
-        add_key(crypttext, &(-key))
+        (add_key(crypttext, &(-key)), key)
     }
 
     fn find_max(crypttext: &String) -> usize {

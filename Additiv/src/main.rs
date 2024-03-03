@@ -1,5 +1,4 @@
 use crate::add::add::*;
-
 mod add;
 
 fn main() {
@@ -21,8 +20,10 @@ fn main() {
         }, 
         2 => {
             let crypttext = read_from_file(&input_path);
-            let plaintext = decrypt(&crypttext);
-            let _ = write_output_to_file(&output_path, &plaintext);
+            let plaintext = decrypt(&crypttext).0;
+            let k = decrypt(&crypttext).1.to_string();
+            let output = format!("{}\n{}", k, plaintext);
+            let _ = write_output_to_file(&output_path, &output);
         }
         _ => {
             panic!("Modus als Zahl zwischen 0 und 2 angeben")
