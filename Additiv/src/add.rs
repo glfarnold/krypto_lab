@@ -59,7 +59,7 @@ pub mod add {
     pub fn read_args() -> (String, i32, String, i32){
         let args: Vec<String> = env::args().collect();
         if args.len() != 5 {
-            panic!("Programm ausführen mit: cargo run -- [input path] key [outout path] mode")
+            panic!("Programm ausführen mit: cargo run -- [input path] key [output path] mode")
         }
         let input_path = args[1].clone();
         let key: i32 = args[2].parse().unwrap();
