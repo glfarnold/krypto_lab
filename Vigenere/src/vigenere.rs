@@ -3,12 +3,13 @@ pub mod vigenere {
 
     pub fn encrypt(plaintext: &String, keys: &Vec<u8>) -> String {
         let n = keys.len();
+        let k: Vec<u8> = keys.iter().map(|c| c - 65).collect();
         let mut counter = 0;
         let mut ascii_vec: Vec<u8> = plaintext.chars().map(|c| c as u8).collect(); 
         for i in 0..ascii_vec.len() {
             if 65 < ascii_vec[i] && ascii_vec[i] < 91 {
                 ascii_vec[i] -= 65;
-                ascii_vec[i] = (ascii_vec[i] + keys[counter % n]) % 26;
+                ascii_vec[i] = (ascii_vec[i] + k[counter % n]) % 26;
                 counter += 1;
                 ascii_vec[i] += 65;
             }
@@ -19,12 +20,13 @@ pub mod vigenere {
 
     pub fn decrypt(crypttext: &String, key: &Vec<u8>) -> String {
         let n = key.len();
+        let k: Vec<u8> = key.iter().map(|c| c - 65).collect();
         let mut counter = 0;
         let mut ascii_vec: Vec<u8> = crypttext.chars().map(|c| c as u8).collect(); 
         for i in 0..ascii_vec.len() {
             if 65 < ascii_vec[i] && ascii_vec[i] < 91 {
                 ascii_vec[i] -= 65;
-                let mut tmp = (ascii_vec[i] as i32 - key[counter % n] as i32) % 26;
+                let mut tmp = (ascii_vec[i] as i32 - k[counter % n] as i32) % 26;
                 if tmp < 0 {
                     tmp = 26 + tmp;
                 }
@@ -71,22 +73,22 @@ pub mod vigenere {
         max_index
     }
 
-    fn get_coincidence_index(crypttext: &String) -> f64 {
-        let n = crypttext.len() as i32;
+    pub fn get_coincidence_index(crypttext: &String) -> f64 {
         let mut h: Vec<i32> = vec![0;26];
-        let mut chars: Vec<u8> = crypttext.chars().map(|c| c as u8).collect();
+        let tmp: Vec<char> = remove_chars(&crypttext.chars().collect());
+        let mut chars: Vec<u8> = tmp.iter().map(|&c| c as u8).collect();
+        let n = chars.len() as i32;
         for i in 0..chars.len() {
             if 65 <= chars[i] && chars[i] < 91 {
                 chars[i] -= 65;
                 h[chars[i] as usize] += 1;
             }
         }
-
         let mut ic: f64 = 0.0;
         for i in 0..h.len() {
-            ic += (h[i] * (h[i]-1)) as f64 /(n * (n-1)) as f64;
+            ic = ic + (h[i] * (h[i]-1)) as f64 ;
         }
-        ic
+        ic /(n * (n-1)) as f64
     }
 
     pub fn divide_into_blocks(crypttext: &String, i: &i32) -> Vec<String> {
@@ -97,7 +99,7 @@ pub mod vigenere {
         }
         texts
     }
-
+    
     // Vigenere Chiffre ignoriert alle Characters, die keine lateinischen Großbuchstaben sind
     // deswegen werden diese mit dieser Funktion entfernt, bevor der Crypttext in i Blöcke geteilt wird
     pub fn remove_chars(chars: &Vec<char>) -> Vec<char> {
@@ -120,7 +122,7 @@ pub mod vigenere {
         indexed_ic.sort_by(|a,b| a.1.partial_cmp(b.1).unwrap());
         let sorted_indices: Vec<usize> = indexed_ic.iter().map(|&(index, _)| index).collect();
         println!("{:?}", sorted_indices);
-        sorted_indices[sorted_indices.len()-1] as i32
+        sorted_indices[sorted_indices.len()-1] as i32 + 1
     }
 
     pub fn read_from_file(file_path: &str) -> String {

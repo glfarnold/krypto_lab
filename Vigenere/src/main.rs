@@ -19,6 +19,7 @@ fn main() {
     let a_raw = remove_chars(&c.chars().collect());
     let a_raw_string = a_raw.iter().collect();
     let n = find_key_length(&c);
+    println!("{}", n);
     let key = get_key(&a_raw_string, &n);
 
 
