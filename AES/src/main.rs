@@ -1,36 +1,63 @@
-use aes::aes::aes;
-use io_functions::io_functions::{hex_input, print_beauty};
-
-use crate::{aes::aes::{add_round_key, get_sbox, ini_aes, mix_columns, shift_rows, sub_bytes}, betriebsmodi::betriebsmodi::divide_into_blocks};
+use aes::aes::*;
+use aes_keygen::aes_keygen::*;
+use betriebsmodi::betriebsmodi::ecb::*;
+use betriebsmodi::betriebsmodi::cbc::*;
+use betriebsmodi::betriebsmodi::ofb::*;
+use betriebsmodi::betriebsmodi::ctr::*;
+use io_functions::io_functions::*;
 
 mod aes;
 mod io_functions;
 mod betriebsmodi;
+mod aes_keygen;
 
 fn main() {
-    // let mut c = vec![0x00, 0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70, 0x80, 0x90, 0xa0, 0xb0, 0xc0, 0xd0, 0xe0, 0xf0];
-    // let mut a: Vec<u8> = vec![0xdb, 0x13, 0x53, 0x45, 0xf2, 0x0a, 0x22, 0x5c, 0x01, 0x01, 0x01, 0x01, 0xC6, 0xc6, 0xc6, 0xc6];
-    // let b = ini_aes(&c);
-    // println!("{:?}", b);
-    // let m = mix_columns(&b, &false);
-    // let sbox = get_sbox(&true);
-    // let m = sub_bytes(&b, &sbox);
+    let (betriebsmodus, input_path, key_path, output_path, mode, iv_path) = read_args();
+    let pt = hex_input(&input_path)[0].clone();
+    let key = convert_to_u32(&hex_input(&key_path)[0].clone());
+    // Als erstes wird die Key Expansion durchgeführt
+    let round_keys: Vec<Vec<u8>> = convert_to_u8(&generate_key(&key));
+    let _ = write_key_to_file(&key_path, &round_keys);
 
+    match betriebsmodus.as_str() {
+        "ecb" => {
+            let mut ct: Vec<u8> = Vec::new();
+            if mode {
+                ct = ecb_encrypt(&pt, &16, &round_keys);
+            }
+            else {
+                ct = ecb_decrypt(&pt, &16, &round_keys);
+            }
+            let _ = write_output_to_file(&output_path, &ct);
+        },
+        "cbc" => {
+            let mut ct: Vec<u8> = Vec::new();
+            if mode {
+                ct = cbc_encrypt(&pt, &16, &round_keys);
+            }
+            else {
+                ct = cbc_decrypt(&pt, &16, &round_keys);
+            }
+            let _ = write_output_to_file(&output_path, &ct);
+        },
+        "ofb" => {
+            let ini = hex_input(&iv_path)[0].clone();
+            let ct = ofb_encrypt(&pt, &16, &round_keys, &ini);            
+            let _ = write_output_to_file(&output_path, &ct);
+        },
+        "ctr" => {
+            let mut ct: Vec<u8> = Vec::new();
+            if mode {
+                ct = cbc_encrypt(&pt, &16, &round_keys);
+            }
+            else {
+                ct = cbc_decrypt(&pt, &16, &round_keys);
+            }
+            let _ = write_output_to_file(&output_path, &ct);
 
-    // for i in 0..4{
-    //     for j in 0..4 {
-    //         print!(" {:02X} ", m[j][i]);
-    //     }
-    // println!("");
-// }
-    // let pt = hex_input("data/Beispiel_1_Kryptotext.txt")[0].clone();
-    // let keys = hex_input("data/Beispiel_key.txt");
-    // let ct = aes(&ini_aes(&pt), &keys, &false);
-    // print_beauty(&ct);
-
-    let a: Vec<u8> = (0..100).collect();
-    println!("{:?}", divide_into_blocks(&a, &16));
-    
+        },
+        _ => {panic!("Folgende Betriebsmodi sind implementiert: ECB, CBC, OFB, CTR")}
+    }
 }
 
 
