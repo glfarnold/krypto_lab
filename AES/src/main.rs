@@ -1,10 +1,11 @@
 use aes::aes::aes;
 use io_functions::io_functions::{hex_input, print_beauty};
 
-use crate::aes::aes::{add_round_key, get_sbox, ini_aes, mix_columns, shift_rows, sub_bytes};
+use crate::{aes::aes::{add_round_key, get_sbox, ini_aes, mix_columns, shift_rows, sub_bytes}, betriebsmodi::betriebsmodi::divide_into_blocks};
 
 mod aes;
 mod io_functions;
+mod betriebsmodi;
 
 fn main() {
     // let mut c = vec![0x00, 0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70, 0x80, 0x90, 0xa0, 0xb0, 0xc0, 0xd0, 0xe0, 0xf0];
@@ -22,10 +23,13 @@ fn main() {
     //     }
     // println!("");
 // }
-    let pt = hex_input("data/Beispiel_1_Klartext.txt")[0].clone();
-    let keys = hex_input("data/Beispiel_key.txt");
-    let ct = aes(&ini_aes(&pt), &keys, &true);
-    print_beauty(&ct);
+    // let pt = hex_input("data/Beispiel_1_Kryptotext.txt")[0].clone();
+    // let keys = hex_input("data/Beispiel_key.txt");
+    // let ct = aes(&ini_aes(&pt), &keys, &false);
+    // print_beauty(&ct);
+
+    let a: Vec<u8> = (0..100).collect();
+    println!("{:?}", divide_into_blocks(&a, &16));
     
 }
 

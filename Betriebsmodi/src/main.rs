@@ -22,9 +22,9 @@ mod io_files;
 
 fn main() {
     let mut plaintext: Vec<Vec<u8>> = hex_input("/home/garnold/Uni/Lab/Betriebsmodi/src/pt.txt");
-    let keys = key_input("/home/garnold/Uni/Lab/Betriebsmodi/src/key.txt");
+    // let keys = key_input("/home/garnold/Uni/Lab/Betriebsmodi/src/key.txt");
     // let _= write_output_to_file("/home/garnold/Uni/Lab/Betriebsmodi/src/key.txt", &keys);
-    println!("{:?}", keys);
+    // println!("{:?}", keys);
 }
 
 

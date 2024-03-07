@@ -1,9 +1,5 @@
 pub mod aes {
-    // start with vec of u8 where each u8 represents one byte from the input
-    // this vec should be transformed into a column major 2d Array
-
     use std::vec;
-
     use crate::io_functions::io_functions::{hex_input, print_beauty};
 
     // transforms a Array of u8 into a column major 2D Array, pt is 128 Bits Block
@@ -18,6 +14,18 @@ pub mod aes {
         }
         matrix
     } 
+
+    // Ergebnis der AES Verschlüsselung ist ein 2D Array, mit dieser Funktion 
+    // Umwandlung zu 16 Byte Block
+    pub fn finish_aes(ct: &Vec<Vec<u8>>) -> Vec<u8> {
+        let mut result: Vec<u8> = Vec::new();
+        for i in 0..4 {
+            for j in 0..4 {
+                result.push(ct[i][j]);
+            }
+        }
+        result
+    }
 
     pub fn add_round_key(state: &Vec<Vec<u8>>, key: &Vec<u8>) -> Vec<Vec<u8>> {
         let mut result = state.clone();
@@ -147,34 +155,39 @@ pub mod aes {
         let sbox = get_sbox(&true);
         let mut round_key = get_round_key(&0, keys);
         state = add_round_key(&state, &round_key);
-        print_beauty(&state);
         for i in 1..10 {
             state = sub_bytes(&state, &sbox);
-            print_beauty(&state);
             state = shift_rows(&state, &true);
-            print_beauty(&state);
             state = mix_columns(&state, &true);
-            print_beauty(&state);
             round_key = get_round_key(&i, keys);
-            print_beauty(&state);
-            state = add_round_key(&state, &round_key);
-            print_beauty(&state);
+            state = add_round_key(&state, &round_key);       
         }
         state = sub_bytes(&state, &sbox);
-        print_beauty(&state);
         state = shift_rows(&state, &true);
-        print_beauty(&state);
         round_key = get_round_key(&10, keys);
-        print_beauty(&state);
         state = add_round_key(&state, &round_key);
-        print_beauty(&state);
+
 
         state
     }
 
     fn aes_decrypt(state: &Vec<Vec<u8>>, keys: &Vec<Vec<u8>>) -> Vec<Vec<u8>> {
-        let mut result = state.clone();
+        let mut state = state.clone();
+        let sbox = get_sbox(&false);
+        let mut round_key = get_round_key(&10, keys);
+        state = add_round_key(&state, &round_key);
+        state = shift_rows(&state, &false);
+        state = sub_bytes(&state, &sbox);
+        for i in 1..10 {
+            round_key = get_round_key(&(10-i), keys);
+            state = add_round_key(&state, &round_key);
+            state = mix_columns(&state, &false);
+            state = shift_rows(&state, &false);
+            state = sub_bytes(&state, &sbox);
+        }
+        round_key = get_round_key(&0, keys);
+        state = add_round_key(&state, &round_key);
 
-        result
+        state
     }
 }
