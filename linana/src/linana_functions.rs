@@ -1,5 +1,5 @@
-pub mod linana {
-    use spn::spn_functions::*;
+pub mod linana_functions {
+    use crate::spn_functions::spn_functions::*;
     use rand::{Rng, SeedableRng};
 
     pub const SBOX: [u8; 16] = [0xe, 0x4, 0xd, 0x1, 0x2, 0xf, 0xb, 0x8, 
@@ -23,7 +23,7 @@ pub mod linana {
         pairs
     }
 
-    pub fn my_function(m: Vec<(u16, u16)>) -> (u8, u8) {
+    pub fn lin_attack(m: &Vec<(u16, u16)>) -> (u8, u8) {
         let tmp = m.clone();
         let mut maxkey: (u8, u8) = (0,0);
         let mut a: Vec<Vec<i32>> = vec![vec![0;16];16];
