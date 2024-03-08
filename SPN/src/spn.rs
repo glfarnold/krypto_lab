@@ -1,7 +1,8 @@
 pub mod spn {
+    use core::panic;
     use std::env;
     use std::fs::File;
-    use std::io::Write;
+    use std::io::{BufRead, BufReader, Read, Write};
 
     pub const SBOX: [u8; 16] = [0xe, 0x4, 0xd, 0x1, 
                         0x2, 0xf, 0xb, 0x8, 
@@ -51,7 +52,6 @@ pub mod spn {
             let tmp = plaintext >> (15-i) & 0x1;
             vec[p[i]-1] = tmp;
         }
-
         for i in 0..vec.len() {
             let mut tmp = vec[i];
             tmp <<= 15-i;
@@ -59,41 +59,5 @@ pub mod spn {
         }
 
         result
-    }
-
-    pub fn get_plaintext(plaintext_string: Vec<String>) -> Vec<u16> {
-        let plaintext: Vec<u16> = plaintext_string
-            .iter()
-            .map(|s| match u16::from_str_radix(s.trim_start_matches("0x"), 16) {
-                Ok(value) => value,
-                Err(_) => {
-                    eprintln!("Invalid hexadecimal string in plaintext");
-                    std::process::exit(1);
-                }
-            })
-            .collect();
-    
-        plaintext
-    }
-    
-    pub fn get_key(key_string: String) -> Vec<u16> {
-        let key = match u16::from_str_radix(key_string.trim_start_matches("0x"), 16) {
-            Ok(result) => result,
-            Err(_) => {
-                eprintln!("Invalid hexadecimal string in key");
-                std::process::exit(1);
-            }
-        };
-        let keys: Vec<u16> = vec![key; 5];
-    
-        keys
-    }
-
-    pub fn write_output_to_file(file_path: &str, crypttext: &[u16]) -> Result<(), std::io::Error> {
-        let mut file = File::create(file_path)?;
-        
-        writeln!(file, "Crypttext: {:?}", crypttext)?;
-    
-        Ok(())
     }
 }
