@@ -1,13 +1,15 @@
 pub mod vigenere {
     use std::{ascii, fs::{self, File}, io::Write};
 
+    use num::{integer::gcd, Integer};
+
     pub fn encrypt(plaintext: &String, keys: &Vec<u8>) -> String {
         let n = keys.len();
         let k: Vec<u8> = keys.iter().map(|c| c - 65).collect();
         let mut counter = 0;
         let mut ascii_vec: Vec<u8> = plaintext.chars().map(|c| c as u8).collect(); 
         for i in 0..ascii_vec.len() {
-            if 65 < ascii_vec[i] && ascii_vec[i] < 91 {
+            if 65 <= ascii_vec[i] && ascii_vec[i] < 91 {
                 ascii_vec[i] -= 65;
                 ascii_vec[i] = (ascii_vec[i] + k[counter % n]) % 26;
                 counter += 1;
@@ -24,7 +26,7 @@ pub mod vigenere {
         let mut counter = 0;
         let mut ascii_vec: Vec<u8> = crypttext.chars().map(|c| c as u8).collect(); 
         for i in 0..ascii_vec.len() {
-            if 65 < ascii_vec[i] && ascii_vec[i] < 91 {
+            if 65 <= ascii_vec[i] && ascii_vec[i] < 91 {
                 ascii_vec[i] -= 65;
                 let mut tmp = (ascii_vec[i] as i32 - k[counter % n] as i32) % 26;
                 if tmp < 0 {
@@ -120,26 +122,17 @@ pub mod vigenere {
         }
         let mut indexed_ic: Vec<(usize, &f64)> = ic.iter().enumerate().collect();
         indexed_ic.sort_by(|a,b| a.1.partial_cmp(b.1).unwrap());
-        let sorted_indices: Vec<usize> = indexed_ic.iter().map(|&(index, _)| index).collect();
-        println!("{:?}", sorted_indices);
-        sorted_indices[sorted_indices.len()-1] as i32 + 1
+        let sorted_indices: Vec<i32> = indexed_ic.iter().map(|&(index, _)| (index + 1) as i32).collect();
+        // take the 3 indices of the lengths with the biggest ICs and calculate their greatest common divisor
+        let indices_of_greatest_ics: Vec<i32> = sorted_indices[sorted_indices.len()-4..sorted_indices.len()].to_vec();
+        get_gcd(&indices_of_greatest_ics)
     }
 
-    pub fn read_from_file(file_path: &str) -> String {
-        let file_contents = match fs::read_to_string(file_path) {
-            Ok(contents) => contents,
-            Err(err) => {
-                eprintln!("Error reading file: {}", err);
-                String::new()
-            }
-        };
-        file_contents
-    }
-
-    pub fn write_output_to_file(file_path: &str, output: &String) -> Result<(), std::io::Error> {
-        let mut file = File::create(file_path)?; 
-        file.write_all(output.as_bytes())?;
-    
-        Ok(())
+    fn get_gcd(vec: &Vec<i32>) -> i32 {
+        let mut result = vec[0];
+        for &val in &vec[1..] {
+            result = gcd(result, val);
+        } 
+        result
     }
 }

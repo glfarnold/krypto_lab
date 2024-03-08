@@ -1,28 +1,21 @@
-use crate::vigenere::vigenere::*;
+use crate::{io_functions::io_functions::*, vigenere::vigenere::*};
 mod vigenere;
+mod io_functions;
 
 fn main() {
-    // let a: String = read_from_file("src/Kryptotext_TAG.txt");
-    // let a_raw = remove_chars(&a.chars().collect());
-    // let a_raw_string = a_raw.iter().collect();
-    // let n = find_key_length(&a);
-    // let key = get_key(&a_raw_string, &n);
-    // println!("{:?}", decrypt(&a, &key.chars().map(|c| c as u8).collect()));
-
-    let b = read_from_file("src/Klartext_1.txt");
-    let k = String::from("ABCDEFG");
-    let _ = write_output_to_file("./output.txt", 
-                            &encrypt(&b, &k.chars().map(|c| c as u8).collect()));
-
-    
-    let c = read_from_file("./output.txt");
-    let a_raw = remove_chars(&c.chars().collect());
-    let a_raw_string = a_raw.iter().collect();
-    let n = find_key_length(&c);
-    println!("{}", n);
-    let key = get_key(&a_raw_string, &n);
-
-
-    let _ = write_output_to_file("./output2.txt", 
-    &decrypt(&c, &k.chars().map(|c| c as u8).collect()));
+    let (input, key, output_path, mode) = read_args();
+    match mode {
+        // encrypt
+        true => {
+            let keys: Vec<u8> = key.chars().map(|c| c as u8).collect();
+            let _ = write_output_to_file(&output_path, &String::from(""), &encrypt(&input, &keys));
+        },
+        // attack
+        false => {
+            let n = find_key_length(&input);
+            let k = get_key(&remove_chars(&input.chars().collect()).iter().collect(), &n);
+            let output = decrypt(&input, &k.chars().map(|c| c as u8).collect());
+            let _ = write_output_to_file(&output_path, &k, &output);
+        }
+    };
 }
