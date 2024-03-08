@@ -1,6 +1,7 @@
 pub mod io_functions {
     use std::{env, fs::{self, File}, io::Write};
 
+    // liest die Kommandozeilenargumente ein
     pub fn read_args() -> (String, String, String, bool) {
         let args: Vec<String> = env::args().collect();
         if !(args.len() == 4 || args.len() == 5) {
@@ -19,6 +20,7 @@ pub mod io_functions {
         (input, key, output_path, mode)
     }
 
+    // liest den Inhalt eines Files vom angegebenen Pfad in einen String ein
     pub fn read_from_file(file_path: &str) -> String {
         let file_contents = match fs::read_to_string(file_path) {
             Ok(contents) => contents,
@@ -30,6 +32,7 @@ pub mod io_functions {
         file_contents
     }
 
+    // Schreibt den Inhalt des gewünschten Outputs in ein File am angegebenen Pfad
     pub fn write_output_to_file(file_path: &str, key: &String, output: &String) -> Result<(), std::io::Error> {
         let mut file = File::create(file_path)?; 
         if key.is_empty() {

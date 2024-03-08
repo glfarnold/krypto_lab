@@ -1,8 +1,8 @@
 pub mod vigenere {
-    use std::{ascii, fs::{self, File}, io::Write};
+    use num::integer::gcd;
 
-    use num::{integer::gcd, Integer};
-
+    // Verschlüsselung des Vigenereverfahrens 
+    // Zeichen, die keine Großbuchstaben sind, werden übergangen
     pub fn encrypt(plaintext: &String, keys: &Vec<u8>) -> String {
         let n = keys.len();
         let k: Vec<u8> = keys.iter().map(|c| c - 65).collect();
@@ -20,6 +20,9 @@ pub mod vigenere {
         crypttext
     }
 
+
+    // Entschlüsselung mit bekanntem Schlüssel 
+    // Zeichen, die keine Großbuchstaben sind, werden übergangen
     pub fn decrypt(crypttext: &String, key: &Vec<u8>) -> String {
         let n = key.len();
         let k: Vec<u8> = key.iter().map(|c| c - 65).collect();
@@ -41,10 +44,11 @@ pub mod vigenere {
         crypttext
     }
 
+    // Häufigkeitsanalyse bei bekannter Blocklänge n
+    // der Kryptotext wird in n Blöcke unterteilt, in diesen wird jeweils Häufigkeitsanalyse angewendet
     pub fn get_key(crypttext: &String, n: &i32) -> String {
         let texts: Vec<String> = divide_into_blocks(crypttext, n);
         let mut key: String = String::new();
-        // Häufigkeitsanalyse für jedes x_i
         for i in 0..texts.len() {
             let max = find_max(&texts[i]) as u8;
             let mut key_char: i32 = (max as i32 - 4) % 26;
@@ -56,6 +60,7 @@ pub mod vigenere {
         key
     }
 
+    // Funktion, um den am häufigsten vorkommenden Buchstaben in einem String zu finden
     fn find_max(crypttext: &String) -> usize {
         let mut counter: Vec<i32> = vec![0;26];
         let mut chars: Vec<u8> = crypttext.chars().map(|c| c as u8).collect();
@@ -75,6 +80,7 @@ pub mod vigenere {
         max_index
     }
 
+    // Funktion, die den Koinzidenzindex für einen gegebenen String berechnet
     pub fn get_coincidence_index(crypttext: &String) -> f64 {
         let mut h: Vec<i32> = vec![0;26];
         let tmp: Vec<char> = remove_chars(&crypttext.chars().collect());
@@ -93,6 +99,7 @@ pub mod vigenere {
         ic /(n * (n-1)) as f64
     }
 
+    // Funktion, die einen String in i Blöcke unterteilt
     pub fn divide_into_blocks(crypttext: &String, i: &i32) -> Vec<String> {
         let chars: Vec<char> = remove_chars(&crypttext.chars().collect());
         let mut texts: Vec<String> = vec![String::new(); *i as usize];
@@ -110,6 +117,9 @@ pub mod vigenere {
         tmp
     }
 
+    // für jede Blockanzahl wird der Mittelwert der ICs der Blöcke berechnet 
+    // von den drei Blockanzahlen mit den größten Werten wird der größte gemeinsame Teiler bestimmt, dies ist 
+    // mit hoher Wahrscheinlichkeit die Länge des Schlüssels
     pub fn find_key_length(crypttext: &String) -> i32 {
         let mut ic = vec![0.0;100];
         for i in 1..101 {
@@ -128,6 +138,7 @@ pub mod vigenere {
         get_gcd(&indices_of_greatest_ics)
     }
 
+    // Funktion, die den größten gemeinsamen Teiler der Einträge eines Vektors zurückgibt
     fn get_gcd(vec: &Vec<i32>) -> i32 {
         let mut result = vec[0];
         for &val in &vec[1..] {
