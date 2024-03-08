@@ -1,12 +1,6 @@
 use io_functions::io_functions::{read_args, write_output_to_file};
-
-use crate::linana::linana::*;
-use crate::spn::spn::*;
-use std::env;
-use std::fs::File;
-use std::io::Write;
-
-mod spn;
+use crate::spn_functions::spn_functions::*;
+mod spn_functions;
 mod linana;
 mod io_functions;
 

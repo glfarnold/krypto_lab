@@ -25,9 +25,9 @@ pub mod linana {
 
                     let x1: u8 = ((x >> 8) & 0xff) as u8;
 
-                    let x_bits = bits(&x1);
-                    let u2_bits = bits(&u2);
-                    let u4_bits = bits(&u4);
+                    let _x_bits = bits(&x1);
+                    let _u2_bits = bits(&u2);
+                    let _u4_bits = bits(&u4);
 
                     if bits(&x1)[4] ^ bits(&x1)[6] ^ bits(&x1)[7] ^ 
                        bits(&u2)[5] ^ bits(&u2)[7] ^ bits(&u4)[5] ^ bits(&u4)[7] == 0 {

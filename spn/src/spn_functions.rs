@@ -1,9 +1,4 @@
-pub mod spn {
-    use core::panic;
-    use std::env;
-    use std::fs::File;
-    use std::io::{BufRead, BufReader, Read, Write};
-
+pub mod spn_functions {
     pub const SBOX: [u8; 16] = [0xe, 0x4, 0xd, 0x1, 
                         0x2, 0xf, 0xb, 0x8, 
                         0x3, 0xa, 0x6, 0xc, 
