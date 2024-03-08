@@ -1,6 +1,6 @@
 Implementierung der Linearen Analyse Attacke auf ein SPN Netzwerk 
 
-Es wurden mit dem Schlüssel 0xA346 und der SPN Verschlüsselung 8000 Klartext- / Kryptotextpaare erstellt. 
+Es wurden mit dem Schlüssel 0xA346 (in jeder Runde gleich) und der SPN Verschlüsselung 8000 Klartext- / Kryptotextpaare erstellt. 
 Diese sind im Ordner data abgelegt.
 
 Mit der Linearen Analyse können die Bits 4-7 sowie 12-15 des letzten Rundenschlüssels zu einer hohen Wahrscheinlichkeit richtig ermittelt werden. Dies erleichtert einen Brute Force Angriff auf das SPN Netzwerk erheblich. 
