@@ -1,7 +1,9 @@
 pub mod linana {
-    extern crate SPN;
-    use SPN::spn::*;
+    use spn::spn_functions::*;
     use rand::{Rng, SeedableRng};
+
+    pub const SBOX: [u8; 16] = [0xe, 0x4, 0xd, 0x1, 0x2, 0xf, 0xb, 0x8, 
+                                0x3, 0xa, 0x6, 0xc, 0x5, 0x9, 0x0, 0x7];
 
     pub const SBOX_INV: [u8; 16] = [0xe, 0x3, 0x4, 0x8, 0x1, 0xc, 0xa,
                                     0xf, 0x7, 0xd, 0x9, 0x6, 0xb, 0x2, 0x0, 0x5];
@@ -10,12 +12,12 @@ pub mod linana {
         (0..8).map(|i| num >> i & 0x1).rev().collect::<Vec<_>>().try_into().unwrap()
     }
 
-    pub fn create_n_pairs(n: &i32) -> Vec<(u16, u16)> {
+    pub fn create_n_pairs(n: &i32, keys: &Vec<u16>) -> Vec<(u16, u16)> {
         let mut rng = rand::rngs::StdRng::seed_from_u64(0x4242);
         let mut pairs: Vec<(u16, u16)> = Vec::with_capacity(*n as usize);
         for _ in 0..*n as usize {
             let random_value: u16 = rng.gen(); 
-            let encrypted_value: u16 = spn()
+            let encrypted_value: u16 = spn(&random_value, keys, &SBOX);
             pairs.push((random_value, encrypted_value));
         }
         pairs

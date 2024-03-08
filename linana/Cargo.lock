@@ -3,18 +3,6 @@
 version = 3
 
 [[package]]
-name = "LinAna"
-version = "0.1.0"
-dependencies = [
- "SPN",
- "rand",
-]
-
-[[package]]
-name = "SPN"
-version = "0.1.0"
-
-[[package]]
 name = "cfg-if"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -36,6 +24,14 @@ name = "libc"
 version = "0.2.153"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9c198f91728a82281a64e1f4f9eeb25d82cb32a5de251c6bd1b5154d63a8e7bd"
+
+[[package]]
+name = "linana"
+version = "0.1.0"
+dependencies = [
+ "rand",
+ "spn",
+]
 
 [[package]]
 name = "ppv-lite86"
@@ -72,6 +68,10 @@ checksum = "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c"
 dependencies = [
  "getrandom",
 ]
+
+[[package]]
+name = "spn"
+version = "0.1.0"
 
 [[package]]
 name = "wasi"
