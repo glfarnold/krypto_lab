@@ -1,6 +1,8 @@
 pub mod input_funtions {
     use std::{env, fs::File, io::{self, BufRead}};
 
+    // Funktion, die Hexadezimalzahlen aus einem Input File einliest und als Vec<Vec<u8>> zurückgibt 
+    // Jede Zeile ist ein Vec<u8>, wobei jedes von einem Leerzeichen getrennte Zeichen als u8 interpretiert wird
     pub fn hex_input(path: &str) -> Vec<Vec<u8>> {
         let file = File::open(path).expect("Pfad existiert nicht");
         let contents = io::BufReader::new(file);
@@ -18,6 +20,7 @@ pub mod input_funtions {
         vec
     }
 
+    // Einlesen der über die Kommandozeile angegebenen Pfade und auslesen der an diesen Pfaden liegenden Inputs
     pub fn read_args() -> (Vec<u8>, Vec<Vec<u8>>) {
         let args: Vec<String> = env::args().collect();
         let sbox_path = args[1].clone();
