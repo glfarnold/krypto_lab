@@ -107,9 +107,10 @@ pub mod betriebsmodi {
         use super::*;
         use crate::aes::aes::*;
 
+        // Encrypt und Decrypt Funktion sind bei CTR gleich
         pub fn ctr_encrypt(pt: &Vec<u8>, t: &i32, keys: &Vec<Vec<u8>>) -> Vec<u8> {
             let blocks = divide_into_blocks(pt, t);
-            let ctr_vec = vec![0; *t as usize];
+            let mut ctr_vec = vec![0; *t as usize];
             let mut result: Vec<u8> = Vec::new();
             for i in 0..blocks.len() {
                 // encrypt ctr_vec
@@ -117,13 +118,26 @@ pub mod betriebsmodi {
                 result.extend(add_blocks(&blocks[i], &tmp));
 
                 // increment ctr_vec
-                
+                ctr_vec = increment_vec(&result);
             }
             result
         }
 
         fn increment_vec(vec: &Vec<u8>) -> Vec<u8> {
-            
+            let mut i = 0;
+            let mut result = vec![0;16];
+            while vec[i] != 0xff || i != 15 {
+                i += 1;
+            } 
+            // wenn i 0 ist, kommt es zu einem Overflow, Counter wird auf 0 zurückgesetzt
+            if i == 0 {
+                return result;
+            }
+            // sonst wird der Wert in vec[i-1] inkrementiert
+            result = vec.clone();
+            result[i-1] += 1;
+
+            result
         }
     }
 }
