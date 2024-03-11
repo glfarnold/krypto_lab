@@ -3,5 +3,5 @@
 version = 3
 
 [[package]]
-name = "DHK"
+name = "dhk"
 version = "0.1.0"
