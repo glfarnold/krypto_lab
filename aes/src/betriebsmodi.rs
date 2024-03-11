@@ -107,5 +107,23 @@ pub mod betriebsmodi {
         use super::*;
         use crate::aes::aes::*;
 
+        pub fn ctr_encrypt(pt: &Vec<u8>, t: &i32, keys: &Vec<Vec<u8>>) -> Vec<u8> {
+            let blocks = divide_into_blocks(pt, t);
+            let ctr_vec = vec![0; *t as usize];
+            let mut result: Vec<u8> = Vec::new();
+            for i in 0..blocks.len() {
+                // encrypt ctr_vec
+                let tmp = finish_aes(&aes(&ini_aes(&ctr_vec), keys, &true));
+                result.extend(add_blocks(&blocks[i], &tmp));
+
+                // increment ctr_vec
+                
+            }
+            result
+        }
+
+        fn increment_vec(vec: &Vec<u8>) -> Vec<u8> {
+            
+        }
     }
 }
