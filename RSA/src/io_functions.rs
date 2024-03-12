@@ -1,27 +1,45 @@
 pub mod io_functions {
     use std::{env, fs::File};
-    use std::io::{self, BufRead};
+    use std::io::{self, BufRead, BufReader};
     use std::path::Path;
     use std::io::Write;
 
     use num_bigint::BigInt;
 
-    pub fn write_output_to_file(file_path: &str, output: &Vec<BigInt>) -> Result<(), std::io::Error> {
+    pub fn write_output_to_file(file_path: &str, output: &BigInt) -> Result<(), std::io::Error> {
         let mut file = File::create(file_path)?; 
-        for i in 0..output.len() {
-            writeln!(file, "{:?}", output[i])?;
-        }
+        writeln!(file, "{:?}", output)?;
     
         Ok(())
     }
 
-    pub fn read_user_input() -> (u64, String, String, String) {
-        let mut args: Vec<String> = env::args().collect();
-        let num_bits: u64 = args[1].clone().parse().unwrap();
-        let priv_key_path = args[2].clone();
-        let pub_key_path = args[3].clone();
-        let primes_key_path = args[4].clone();
+    fn read_file(path: &str) -> Vec<BigInt> {
+        let file = File::open(path).expect("Pfad existiert nicht");
+        let contents = io::BufReader::new(file);
+        let mut result: Vec<BigInt> = Vec::new();
+    
+        for line in contents.lines() {
+            match line {
+                Ok(line_contents) =>  {
+                    result.push(line_contents.parse().unwrap());
+                }, 
+                Err(_) => eprintln!("Inhalt der Datei konnte nicht gelesen werden")
+            }
+        }
+        result
+    }
 
-        (num_bits, priv_key_path, pub_key_path, primes_key_path)
+    pub fn read_user_input() -> (BigInt, Vec<BigInt>, String, bool) {
+        let mut args: Vec<String> = env::args().collect();
+        let message_path = args[1].clone();
+        let key_path = args[2].clone();
+        let output_path = args[3].clone();
+        let mode: bool = args[4].clone().parse().unwrap();
+
+        let message = read_file(&message_path)[0].clone();
+        let key = read_file(&key_path);
+        assert_eq!(key.len(), 2);
+
+        (message, key, output_path, mode)
     }
 }
