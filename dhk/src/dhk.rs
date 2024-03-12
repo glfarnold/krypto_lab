@@ -46,7 +46,6 @@ pub mod dhk {
         for _ in 0..5 {
             is_prime = miller_rabin(&(2*q + BigInt::from(1)));
             if !is_prime {
-                println!("hallo");
                 break;
             }
         }
@@ -56,8 +55,23 @@ pub mod dhk {
     // da q mit p = 2q+1 eine Primzahl ist, kann man jedes Element aus Z_p als Erzeuger wählen
     // deswegen wird hier eine zufällige Zahl aus dieser Gruppe zurückgegeben
     pub fn get_g(p: &BigInt) -> BigInt {
+        let m = p - BigInt::from(1);
         let mut rng = rand::thread_rng();
-        rng.gen_range(BigInt::from(2)..p.clone())
+        let mut g: BigInt = rng.gen_bigint_range(&BigInt::from(2), p);
+        let prime_factors = vec![BigInt::from(2), m.clone()];
+        let mut is_generator: bool = false;
+        while !is_generator {
+            for prime_factor in &prime_factors {
+                let x = &m / prime_factor; 
+                is_generator = true;
+                if square_and_multiply(&g, &x, &m) == BigInt::from(1) {
+                    g = rng.gen_bigint_range(&BigInt::from(2), p);
+                    is_generator = false;
+                    break;
+                }
+            }
+        }
+        g        
     }
 
     // Alice und Bob nehmen beide zufällig eine Zahl x mit 1 < x < p
@@ -80,7 +94,7 @@ pub mod dhk {
             let mut check_prime: bool = true;
             for prime in &primes {
                 let p_tmp: BigInt = &p + prime;
-                for j in 0..5 {
+                for _ in 0..5 {
                     check_prime = miller_rabin(&p_tmp);
                     if !check_prime {
                         break;
@@ -125,11 +139,11 @@ pub mod dhk {
         if b == One::one() {
             return true;
         }
-        for i in 1..k+1 {
+        for _ in 1..k+1 {
             if b.clone() == n_minus_1 {
                 return true
             }
-            b = (&b * &b) % n;
+            b = square_and_multiply(&b, &BigInt::from(2), n);
         }
         return false;
     }
