@@ -1,11 +1,6 @@
-mod rsa_key;
 mod rsa;
 mod io_functions;
-use std::process::Output;
-
-use num_bigint::BigInt;
 use crate::io_functions::io_functions::{read_user_input, write_output_to_file};
-use crate::rsa_key::rsa_key::*;
 use crate::rsa::rsa::*;
 
 fn main() {

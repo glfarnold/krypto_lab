@@ -2,6 +2,7 @@ pub mod rsa {
     use num_bigint::*;
     use num_traits::{Zero, One};
 
+    // Implementierung des Quadrieren und Multiplizieren Algorithmus
     pub fn square_and_multiply (x: &BigInt, m: &BigInt, n: &BigInt) -> BigInt {
         let mut y: BigInt = One::one();
         let mut val: BigInt = x.clone();
@@ -20,10 +21,12 @@ pub mod rsa {
         y
     }
 
+    // Verschlüsselung mit RSA
     pub fn rsa_encrypt(x: &BigInt, public_key: &(BigInt, BigInt)) -> BigInt {
         square_and_multiply(x, &public_key.0, &public_key.1)
     }
 
+    // Entschlüsselung mit RSA
     pub fn rsa_decrypt(y: &BigInt, private_key: &(BigInt, BigInt)) -> BigInt {
         square_and_multiply(y, &private_key.0, &private_key.1)
     }
