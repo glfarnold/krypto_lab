@@ -30,7 +30,7 @@ pub mod io_functions {
     }
 
     pub fn read_user_input() -> (BigInt, Vec<BigInt>, String, bool) {
-        let mut args: Vec<String> = env::args().collect();
+        let args: Vec<String> = env::args().collect();
         let message_path = args[1].clone();
         let key_path = args[2].clone();
         let output_path = args[3].clone();
