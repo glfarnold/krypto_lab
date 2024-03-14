@@ -116,5 +116,52 @@ pub mod sha_functions {
 
     }
 
-    pub fn rho()
+    pub fn rho(state: &Vec<Vec<Vec<u8>>>) -> Vec<Vec<Vec<u8>>> {
+        let mut result: Vec<Vec<Vec<u8>>> = vec![vec![vec![0;64];5];5]; 
+        for z in 0..64 {
+            result[0][0][z] = state[0][0][z];
+        }
+        let (mut x,mut y) = (1,0);
+        for t in 0..24 {
+            for z in 0..64 {
+                result[x][y][z] = state[x][y][(10*64 + z - (t+1)*(t+2)/2) % 64];
+                (x, y) = (y, (2*x+3*y) % 5);
+            }
+        }
+        result
+    }
+
+    pub fn pi(state: &Vec<Vec<Vec<u8>>>) -> Vec<Vec<Vec<u8>>> {
+        let mut result: Vec<Vec<Vec<u8>>> = vec![vec![vec![0;64];5];5]; 
+        for x in 0..5 {
+            for y in 0..5 {
+                for z in 0..64 {
+                    result[x][y][z] = state[(x+3*y)%5][x][z];
+                }
+            }
+        }
+        result
+    }
+
+    pub fn chi(state: &Vec<Vec<Vec<u8>>>) -> Vec<Vec<Vec<u8>>> {
+        let mut result: Vec<Vec<Vec<u8>>> = vec![vec![vec![0;64];5];5]; 
+        for x in 0..5 {
+            for y in 0..5 {
+                for z in 0..64 {
+                    result[x][y][z] = state[x][y][z] ^ ((state[(x+1)%5][y][z] ^ 1) & state[(x+2)%5][y][z]);
+                }
+            }
+        }
+        result
+    }
+
+    pub fn iota(state: &Vec<Vec<Vec<u8>>>, round_constants: &Vec<u64>, round: &usize) -> Vec<Vec<Vec<u8>>> {
+        let mut result: Vec<Vec<Vec<u8>>> = state.clone();
+        let rc = round_constants[*round];
+        for z in 0..64 {
+            let tmp = (rc >> (63-z) & 1) as u8;
+            result[0][0][z] ^= tmp;
+        }
+        result
+    }
 }
