@@ -1,10 +1,28 @@
-use num_bigint::BigUint;
+use std::ptr::read;
 
-use crate::sha_functions::sha_functions::{bigint_to_vec_le, state_to_string, string_to_state, vec_le_to_bigint};
+use io_functions::io_functions::read_args;
+use num_bigint::BigUint;
+use num_traits::Zero;
+use sha_functions::sha_functions::{divide_into_blocks, keccak, pad, rnd};
+
+use crate::{io_functions::io_functions::get_rc, sha_functions::sha_functions::{bigint_to_vec_le, state_to_string, string_to_state, vec_le_to_bigint}};
 
 mod sha_functions;
+mod io_functions;
 fn main() {
-    let m = BigUint::from(256u32);
-    let tmp = bigint_to_vec_le(&m);
-    println!("{:?}", vec_le_to_bigint(&tmp));
+    let (m, output_path) = read_args();
+    println!("{:02X}", m);
+    println!("{:40X}", pad(&m, &1152));
+    let blocks = divide_into_blocks(&pad(&m, &1152), &1152);
+    let mut s = BigUint::zero();
+    for i in 0..blocks.len() {
+        let mut p: BigUint = blocks[i].clone();
+        p <<= 448;
+        
+        let tmp: BigUint = s.clone() ^ p;
+        let state: Vec<u8> = bigint_to_vec_le(&tmp);   
+        let round_constants = get_rc("data/roundConstants.txt");
+        let result = keccak(&state, &round_constants);  
+        s = vec_le_to_bigint(&result);
+    }
 }

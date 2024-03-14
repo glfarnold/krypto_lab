@@ -3,10 +3,13 @@ pub mod sha_functions {
     use num_traits::{One, Zero};
     use std::{ops::BitAnd, vec};
 
+    use crate::io_functions::io_functions::print_state;
+
     pub fn pad(m: &BigUint, r: &u64) -> BigUint {
         let mut result = m.clone();
         let j = r - ((m.bits() + 2) % r);
         result <<= 1; result += BigUint::one();
+        println!("{:02X}", result);
         result <<= j; 
         result <<= 1; result += BigUint::one();
         result
@@ -51,7 +54,6 @@ pub mod sha_functions {
 
     pub fn vec_le_to_bigint(vec: &Vec<u8>) -> BigUint {
         let mut result = BigUint::zero();
-        println!("{:?}", vec);
         for (i, &bit) in vec.iter().enumerate() {
             if bit != 0 {
                 result |= BigUint::one() << i;
@@ -155,13 +157,29 @@ pub mod sha_functions {
         result
     }
 
-    pub fn iota(state: &Vec<Vec<Vec<u8>>>, round_constants: &Vec<u64>, round: &usize) -> Vec<Vec<Vec<u8>>> {
+    pub fn iota(state: &Vec<Vec<Vec<u8>>>, rc: &u64) -> Vec<Vec<Vec<u8>>> {
         let mut result: Vec<Vec<Vec<u8>>> = state.clone();
-        let rc = round_constants[*round];
         for z in 0..64 {
             let tmp = (rc >> (63-z) & 1) as u8;
             result[0][0][z] ^= tmp;
         }
         result
+    }
+
+    pub fn rnd(state: &Vec<Vec<Vec<u8>>>, rc: &u64) -> Vec<Vec<Vec<u8>>> {
+        let mut result = state.clone();
+        result = theta(&result);
+        result = rho(&result);
+        result = pi(&result);
+        result = chi(&result);
+        iota(&result, &rc)
+    }
+
+    pub fn keccak(s: &Vec<u8>, round_constants: &Vec<u64>) -> Vec<u8> {
+        let mut state = string_to_state(s);
+        for i in 0..24 {
+            state = rnd(&state, &round_constants[i]);
+        }
+        state_to_string(&state)
     }
 }
