@@ -1,7 +1,7 @@
 pub mod sha_functions {
     use num_bigint::{BigInt, BigUint};
     use num_traits::{One, Zero};
-    use std::ops::BitAnd;
+    use std::{ops::BitAnd, vec};
 
     pub fn pad(m: &BigUint, r: &u64) -> BigUint {
         let mut result = m.clone();
@@ -33,8 +33,20 @@ pub mod sha_functions {
         result
     }
 
+    pub fn bigint_to_vec_le(m: &BigUint) -> Vec<u8> {
+        let mut result: Vec<u8> = Vec::new();
+        let bytes = m.to_bytes_le();
+        for byte in bytes {
+            for i in 0..8 {
+                let tmp = byte >> (7-i);
+                result.push(tmp);
+            }
+        }
+        result
+    }
+
     pub fn string_to_state(s: &Vec<u8>) -> Vec<Vec<Vec<u8>>> {
-        let mut state: Vec<Vec<Vec<u8>>> = Vec::new();
+        let mut state: Vec<Vec<Vec<u8>>> = vec![vec![vec![0;64];5];5];
         for y in 0..5 {
             for x in 0..5 {
                 for z in 0..64 {
@@ -46,14 +58,14 @@ pub mod sha_functions {
     }
 
     pub fn state_to_string(state: &Vec<Vec<Vec<u8>>>) -> Vec<u8> {
-        let mut lanes: [[u8; 64]; 25] = [[0; 64]; 25];
+        let mut result: Vec<u8> = Vec::new();
         for i in 0..5 {
             for j in 0..5 {
                 for k in 0..64 {
-                    lanes[5*i + j]. 
+                    result.push(state[j][i][k]);
                 }
-                
             }
         }
+        result
     }
 }
