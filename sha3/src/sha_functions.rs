@@ -35,11 +35,26 @@ pub mod sha_functions {
 
     pub fn bigint_to_vec_le(m: &BigUint) -> Vec<u8> {
         let mut result: Vec<u8> = Vec::new();
-        let bytes = m.to_bytes_le();
-        for byte in bytes {
-            for i in 0..8 {
-                let tmp = byte >> (7-i);
-                result.push(tmp);
+        if *m == BigUint::zero() {
+            return vec![0];
+        }
+
+        let mut tmp = m.clone();
+        while !tmp.is_zero() {
+            let bit = tmp.bit(0);
+            result.push(bit as u8);
+            tmp >>= 1;
+        }
+
+        result
+    }
+
+    pub fn vec_le_to_bigint(vec: &Vec<u8>) -> BigUint {
+        let mut result = BigUint::zero();
+        println!("{:?}", vec);
+        for (i, &bit) in vec.iter().enumerate() {
+            if bit != 0 {
+                result |= BigUint::one() << i;
             }
         }
         result
@@ -68,4 +83,38 @@ pub mod sha_functions {
         }
         result
     }
+
+    pub fn theta(state: &Vec<Vec<Vec<u8>>>) -> Vec<Vec<Vec<u8>>> {
+        let mut result: Vec<Vec<Vec<u8>>> = vec![vec![vec![0;64];5];5]; 
+        let mut c: Vec<Vec<u8>> = vec![vec![0;64];5];
+        for x in 0..5 {
+            for z in 0..64 {
+                let mut tmp: u8 = 0;
+                for y in 0..5 {
+                    tmp ^= state[x][y][z];
+                }
+                c[x][z] = tmp;
+            }
+        }
+
+        let mut d: Vec<Vec<u8>> = vec![vec![0;64];5];
+        for x in 0..5 {
+            for z in 0..64 {
+                d[x][z] = c[(x+4) % 5][z] ^ c[(x+1) % 5][(z+63) % 64];
+            }
+        }
+        
+        for x in 0..5 {
+            for z in 0..64 {
+                for y in 0..5 {
+                    result[x][y][z] = state[x][y][z] ^ d[x][z];
+                }
+            }
+        }
+        
+        result
+
+    }
+
+    pub fn rho()
 }
