@@ -1,5 +1,5 @@
 pub mod io_functions {
-    use std::{env, fs::File, io::{self, BufRead, Read}};
+    use std::{env, fs::File, io::{self, BufRead, Read, Write}};
 
     use num_bigint::BigUint;
     use num_traits::{zero, Zero};
@@ -48,7 +48,7 @@ pub mod io_functions {
             for j in 0..5 {
                 for k in 0..8 {
                     let mut num = 0;
-                    let byte = state[i][j][8*k..8*k+8].to_vec();
+                    let byte = state[j][i][8*k..8*k+8].to_vec();
                     let mut byte_array = [0;1];
                     for (i, &bit) in byte.iter().enumerate() {
                         byte_array[0] |= bit << i;
@@ -62,7 +62,13 @@ pub mod io_functions {
         }
     }
 
-    pub fn print_lanes(state: &Vec<Vec<Vec<u8>>>) {
-
+    pub fn write_output_to_file(path: &str, output: &Vec<u8>) -> Result<(), std::io::Error> {
+        let mut file = File::create(path)?; 
+        for i in 0..output.len() {
+            write!(file, "{:02X}", output[i])?;
+        }
+        writeln!(file, "")?;
+    
+        Ok(())
     }
 }

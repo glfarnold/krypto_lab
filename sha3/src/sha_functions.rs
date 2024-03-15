@@ -5,6 +5,8 @@ pub mod sha_functions {
 
     use crate::io_functions::io_functions::print_state;
 
+    // paddet die Message auf eine Länge von k*r Bits für eine natürliche Zahl k 
+    // Es wird zunächst 01 angehangen, dann eine 1, 0 bis r-1 0en und abschließend eine 1
     pub fn pad(m: &BigUint, r: &u64) -> BigUint {
         let mut result = m.clone();
         result = add_01(&result);
@@ -15,12 +17,14 @@ pub mod sha_functions {
         result
     }
 
+    // hängt 01 an die gegebene Nachricht an
     pub fn add_01(m: &BigUint) -> BigUint {
         let mut result = m.clone();
         result <<= 2; 
         result + BigUint::one()
     }
 
+    // Einlesen der Bytes als little endian
     pub fn read_as_le(m: &BigUint) -> BigUint {
         let mut m_padded_bytes = m.to_bytes_be();
         for i in 0..m_padded_bytes.len() {
@@ -29,6 +33,8 @@ pub mod sha_functions {
         let m_le = BigUint::from_bytes_be(&m_padded_bytes);
         m_le
     }
+
+    // unterteilt die Nachricht in Blöcke mit r Bits
     pub fn divide_into_blocks(m: &BigUint, r: &u64) -> Vec<BigUint> {
         let mut message = m.clone();
         let length = m.bits();
@@ -50,6 +56,8 @@ pub mod sha_functions {
         result
     }
 
+    // die Funktion f arbeitet auf Vec<Vec<Vec<u8>>>, daher muss der Input, der als BigUint 
+    // interpretiert wurde transformiert werden
     pub fn bigint_to_vec_le(m: &BigUint) -> Vec<u8> {
         let mut result: Vec<u8> = Vec::new();
         if *m == BigUint::zero() {
@@ -66,16 +74,8 @@ pub mod sha_functions {
         result
     }
 
-    pub fn vec_le_to_bigint(vec: &Vec<u8>) -> BigUint {
-        let mut result = BigUint::zero();
-        for (i, &bit) in vec.iter().enumerate() {
-            if bit != 0 {
-                result |= BigUint::one() << i;
-            }
-        }
-        result
-    }
-
+    // Input der Rundenfunktion ist ein 5x5x64 Array 
+    // mit dieser Funktion wird das gegebene 1600 bit Array in ein 5x5x64 Array transformiert
     pub fn string_to_state(s: &Vec<u8>) -> Vec<Vec<Vec<u8>>> {
         let mut state: Vec<Vec<Vec<u8>>> = vec![vec![vec![0;64];5];5];
         for y in 0..5 {
@@ -88,6 +88,7 @@ pub mod sha_functions {
         state
     }
 
+    // für die Ausgabe wird das 5x5x64 Array zurück in ein Vec<u8> transformiert
     pub fn state_to_string(state: &Vec<Vec<Vec<u8>>>) -> Vec<u8> {
         let mut result: Vec<u8> = Vec::new();
         for i in 0..5 {
@@ -100,8 +101,11 @@ pub mod sha_functions {
         result
     }
 
+    // theta funktion 
     pub fn theta(state: &Vec<Vec<Vec<u8>>>) -> Vec<Vec<Vec<u8>>> {
         let mut result: Vec<Vec<Vec<u8>>> = vec![vec![vec![0;64];5];5]; 
+
+        // C[x,z] enthält die Parität der Spalte [x,z]
         let mut c: Vec<Vec<u8>> = vec![vec![0;64];5];
         for i in 0..5 {
             let x = (i+3) %5;
@@ -114,6 +118,8 @@ pub mod sha_functions {
                 c[x][z] = tmp;
             }
         }
+
+        // D[x,z] setzt sich aus der Parität der Spalte [x-1,z] und [x+1,z-1] zusammen
         let mut d: Vec<Vec<u8>> = vec![vec![0;64];5];
         for i in 0..5 {
             let x = (i+3)%5;
@@ -121,8 +127,8 @@ pub mod sha_functions {
                 d[x][z] = c[(x+4) % 5][z] ^ c[(x+1) % 5][(z+63) % 64];
             }
         }
-        println!("{:?}", c);
-        println!("{:?}", d);
+
+        // Ergebnis der theta Funktion ist state[x][y][z] ^ D[x][z]
         for i in 0..5 {
             let x = (i+3)%5;
             for z in 0..64 {
@@ -132,11 +138,11 @@ pub mod sha_functions {
                 }
             }
         }
-        
         result
 
     }
 
+    // rho Funktion
     pub fn rho(state: &Vec<Vec<Vec<u8>>>) -> Vec<Vec<Vec<u8>>> {
         let mut result: Vec<Vec<Vec<u8>>> = vec![vec![vec![0;64];5];5]; 
         for z in 0..64 {
@@ -152,6 +158,7 @@ pub mod sha_functions {
         result
     }
 
+    // pi funktion
     pub fn pi(state: &Vec<Vec<Vec<u8>>>) -> Vec<Vec<Vec<u8>>> {
         let mut result: Vec<Vec<Vec<u8>>> = vec![vec![vec![0;64];5];5]; 
         for x in 0..5 {
@@ -164,6 +171,7 @@ pub mod sha_functions {
         result
     }
 
+    // chi funktion
     pub fn chi(state: &Vec<Vec<Vec<u8>>>) -> Vec<Vec<Vec<u8>>> {
         let mut result: Vec<Vec<Vec<u8>>> = vec![vec![vec![0;64];5];5]; 
         for x in 0..5 {
@@ -176,6 +184,7 @@ pub mod sha_functions {
         result
     }
 
+    // iota funktion
     pub fn iota(state: &Vec<Vec<Vec<u8>>>, rc: &u64) -> Vec<Vec<Vec<u8>>> {
         let mut result: Vec<Vec<Vec<u8>>> = state.clone();
         for z in 0..64 {
@@ -185,17 +194,17 @@ pub mod sha_functions {
         result
     }
 
+    // Rundenfunktion rnd (f) 
     pub fn rnd(state: &Vec<Vec<Vec<u8>>>, rc: &u64) -> Vec<Vec<Vec<u8>>> {
         let mut result = state.clone();
         result = theta(&result);
-        print_state(&result);
-        assert_eq!(1,0);
         result = rho(&result);
         result = pi(&result);
         result = chi(&result);
         iota(&result, &rc)
     }
 
+    // sha-3 main Funktion, führt Rundenfunktion 24x aus
     pub fn keccak(s: &Vec<u8>, round_constants: &Vec<u64>) -> Vec<u8> {
         let mut state = string_to_state(s);
         for i in 0..24 {
