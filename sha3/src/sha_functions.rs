@@ -121,7 +121,8 @@ pub mod sha_functions {
                 d[x][z] = c[(x+4) % 5][z] ^ c[(x+1) % 5][(z+63) % 64];
             }
         }
-        
+        println!("{:?}", c);
+        println!("{:?}", d);
         for i in 0..5 {
             let x = (i+3)%5;
             for z in 0..64 {
