@@ -1,20 +1,34 @@
 pub mod sha_functions {
     use num_bigint::{BigInt, BigUint};
     use num_traits::{One, Zero};
-    use std::{ops::BitAnd, vec};
+    use std::{ops::BitAnd, result, vec};
 
     use crate::io_functions::io_functions::print_state;
 
     pub fn pad(m: &BigUint, r: &u64) -> BigUint {
         let mut result = m.clone();
-        let j = r - ((m.bits() + 2) % r);
+        result = add_01(&result);
+        let j = r - ((result.bits() + 2) % r);
         result <<= 1; result += BigUint::one();
-        println!("{:02X}", result);
         result <<= j; 
         result <<= 1; result += BigUint::one();
         result
     }
 
+    pub fn add_01(m: &BigUint) -> BigUint {
+        let mut result = m.clone();
+        result <<= 2; 
+        result + BigUint::one()
+    }
+
+    pub fn read_as_le(m: &BigUint) -> BigUint {
+        let mut m_padded_bytes = m.to_bytes_be();
+        for i in 0..m_padded_bytes.len() {
+        m_padded_bytes[i] = m_padded_bytes[i].reverse_bits();
+        }
+        let m_le = BigUint::from_bytes_be(&m_padded_bytes);
+        m_le
+    }
     pub fn divide_into_blocks(m: &BigUint, r: &u64) -> Vec<BigUint> {
         let mut message = m.clone();
         let length = m.bits();
@@ -48,7 +62,7 @@ pub mod sha_functions {
             result.push(bit as u8);
             tmp >>= 1;
         }
-
+        result.reverse();
         result
     }
 
@@ -89,10 +103,12 @@ pub mod sha_functions {
     pub fn theta(state: &Vec<Vec<Vec<u8>>>) -> Vec<Vec<Vec<u8>>> {
         let mut result: Vec<Vec<Vec<u8>>> = vec![vec![vec![0;64];5];5]; 
         let mut c: Vec<Vec<u8>> = vec![vec![0;64];5];
-        for x in 0..5 {
+        for i in 0..5 {
+            let x = (i+3) %5;
             for z in 0..64 {
                 let mut tmp: u8 = 0;
-                for y in 0..5 {
+                for j in 0..5 {
+                    let y = (j+3) %5;
                     tmp ^= state[x][y][z];
                 }
                 c[x][z] = tmp;
@@ -100,15 +116,18 @@ pub mod sha_functions {
         }
 
         let mut d: Vec<Vec<u8>> = vec![vec![0;64];5];
-        for x in 0..5 {
+        for i in 0..5 {
+            let x = (i+3)%5;
             for z in 0..64 {
                 d[x][z] = c[(x+4) % 5][z] ^ c[(x+1) % 5][(z+63) % 64];
             }
         }
-        
-        for x in 0..5 {
+        println!("{:?}", d);
+        for i in 0..5 {
+            let x = (i+3)%5;
             for z in 0..64 {
-                for y in 0..5 {
+                for j in 0..5 {
+                    let y = (j+3)%5;
                     result[x][y][z] = state[x][y][z] ^ d[x][z];
                 }
             }
@@ -169,6 +188,8 @@ pub mod sha_functions {
     pub fn rnd(state: &Vec<Vec<Vec<u8>>>, rc: &u64) -> Vec<Vec<Vec<u8>>> {
         let mut result = state.clone();
         result = theta(&result);
+        print_state(&result);
+        assert_eq!(1,0);
         result = rho(&result);
         result = pi(&result);
         result = chi(&result);

@@ -1,5 +1,5 @@
 pub mod io_functions {
-    use std::{env, fs::File, io::{self, BufRead}};
+    use std::{env, fs::File, io::{self, BufRead, Read}};
 
     use num_bigint::BigUint;
     use num_traits::{zero, Zero};
@@ -20,35 +20,26 @@ pub mod io_functions {
         result
     }
 
-    fn read_bigint(path: &str) -> BigUint {
-        let file = File::open(path).expect("Pfad existiert nicht");
-        let contents = io::BufReader::new(file);
-        let mut result: BigUint = BigUint::zero();
-
-        for line in contents.lines() {
-            match line {
-                Ok(mut line_contents) =>  {
-                    if line_contents.len() % 2 != 0 {
-                        line_contents.push('0');
-                    }
-                    let bytes = match hex::decode(line_contents) {
-                        Ok(bytes) => bytes,
-                        Err(_) => panic!("Zahl konnte nicht gelesen werden")
-                    };
-                    result = BigUint::from_bytes_le(&bytes);
-                }, 
-                Err(_) => eprintln!("Inhalt der Datei konnte nicht gelesen werden")
-            }
-        }
-        result
+    fn read_num(path: &str) -> io::Result<BigUint> {
+        let mut file = File::open(path)?;
+    
+        let mut content = String::new();
+        file.read_to_string(&mut content)?;
+        let content = content.trim();
+    
+        let number = BigUint::parse_bytes(content.as_bytes(), 16)
+            .ok_or(io::Error::new(io::ErrorKind::InvalidData, "Eingabe kann nicht gelesen werden"))?;
+    
+        Ok(number)
     }
+    
 
     pub fn read_args() -> (BigUint, String) {
         let args: Vec<String> = env::args().collect();
         let input_path = args[1].clone();
         let output_path = args[2].clone();
 
-        let input = read_bigint(&input_path);
+        let input = read_num(&input_path).unwrap();
         (input, output_path)
     }
 
@@ -56,18 +47,22 @@ pub mod io_functions {
         for i in 0..5 {
             for j in 0..5 {
                 for k in 0..8 {
-                    for _ in 0..8 {
-                        let byte = state[i][j][8*k..8*k+8].to_vec();
-                        let mut byte_array = [0;1];
-                        for (i, &bit) in byte.iter().enumerate() {
-                            byte_array[0] |= bit << i;
-                        }
-                        let num: u8 = u8::from_le_bytes(byte_array);
-                        print!(" {:02X} ", num);
+                    let mut num = 0;
+                    let byte = state[i][j][8*k..8*k+8].to_vec();
+                    let mut byte_array = [0;1];
+                    for (i, &bit) in byte.iter().enumerate() {
+                        byte_array[0] |= bit << i;
                     }
+                    byte_array[0] = byte_array[0].reverse_bits();
+                    num = u8::from_be_bytes(byte_array);
+                    print!(" {:02X} ", num);
                 }
                 println!("");
             }
         }
+    }
+
+    pub fn print_lanes(state: &Vec<Vec<Vec<u8>>>) {
+
     }
 }
