@@ -134,7 +134,7 @@ pub mod sha_functions {
             for z in 0..64 {
                 for j in 0..5 {
                     let y = (j+3)%5;
-                    result[x][y][z] = state[x][y][z] ^ d[x][z];
+                    result[x][y][z] = result[x][y][z] ^ d[x][z];
                 }
             }
         }
